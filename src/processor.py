@@ -98,23 +98,23 @@ def process_shard(stage, shard_idx, num_shards, output_dir):
 
 
 # def simple_dialect_detection(data: pl.DataFrame, sample_size: int = 10000) -> pl.DataFrame:
-    """
-    Simple dialect detection by checking if the prefix indicates a dialect.
-    Returns a sample of 100 rows where the prefix matches any dialect prefix.
-    """
-    # Perform filter lazily, then limit to 100 in lazy pipeline.
-    filtered = (
-        data.filter(
-            pl.col("prefix")
-            .str.to_lowercase()
-            .str.strip_chars()
-            .is_in([p.lower() for p in DIALECT_PREFIXES])
-        )
-        .limit(sample_size)
-        .select("prefix", "tgt")
-    )
+    # """
+    # Simple dialect detection by checking if the prefix indicates a dialect.
+    # Returns a sample of 100 rows where the prefix matches any dialect prefix.
+    # """
+    # # Perform filter lazily, then limit to 100 in lazy pipeline.
+    # filtered = (
+    #     data.filter(
+    #         pl.col("prefix")
+    #         .str.to_lowercase()
+    #         .str.strip_chars()
+    #         .is_in([p.lower() for p in DIALECT_PREFIXES])
+    #     )
+    #     .limit(sample_size)
+    #     .select("prefix", "tgt")
+    # )
     
-    # for row in filtered.iter_rows(named=True):
+    # # for row in filtered.iter_rows(named=True):
     pass
 ## Train test splits
 def create_semantic_key(data: pl.LazyFrame) -> pl.LazyFrame:
