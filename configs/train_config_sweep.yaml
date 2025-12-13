@@ -3,7 +3,7 @@ model_name_or_path: "mesolitica/nanot5-small-malaysian-cased"
 cache_dir: null
 
 # Model Arguments
-# Data Arguments
+# Data Argument s
 train_data_path: "src/data/processed/dataset/train.parquet"
 val_data_path: "src/data/processed/dataset/val.parquet"
 test_data_path: "src/data/processed/dataset/test.parquet"
@@ -32,15 +32,15 @@ weight_decay: 0.01
 warmup_steps: 500
 
 logging_steps: 50      
-save_steps: 300        # Not used when save_strategy is "no"
-eval_steps: 300        # Less frequent evals = faster        
+save_steps: 300   
+eval_steps: 300         
 evaluation_strategy: "steps"
-save_strategy: "no"    # Don't save checkpoints during hyperparameter tuning
-save_total_limit: 0    # Don't keep any checkpoints
-load_best_model_at_end: false  # No checkpoints to load
+save_strategy: "no"    
+save_total_limit: 0    
+load_best_model_at_end: false  
 metric_for_best_model: eval_bleu
 greater_is_better: true
-save_safetensors: false  # Don't save models  
+save_safetensors: false  
 
 generation_max_length: 128
 generation_num_beams: 4

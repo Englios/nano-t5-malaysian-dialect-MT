@@ -6,7 +6,7 @@ command:
   - configs/train_config_sweep.yaml
 
 method: bayes 
-max_runs: 5  # Maximum number of runs for this sweep
+max_runs: 5  
 
 metric:
   name: eval_bleu 
@@ -28,7 +28,7 @@ parameters:
     max: 300  
   
   num_train_epochs:
-    values: [2, 3, 4]  # Fewer epochs for faster trials
+    values: [2, 3, 4]  
   
   gradient_accumulation_steps:
     values: [1, 2, 4]
