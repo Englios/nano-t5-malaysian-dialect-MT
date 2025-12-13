@@ -15,7 +15,7 @@ def build_tokenized_datasets(
     """Build tokenized datasets from polars LazyFrame."""
     dataframe = (
         data.with_columns(
-            input_text=pl.concat_str([pl.col("prefix").str.strip_chars(), pl.col("src").str.strip_chars()], separator=" "),
+            input_text=pl.format("terjermah {} ke {}: ", pl.col("detected_src").str.to_lowercase(), pl.col("dialect").str.to_lowercase()),
             target_text=pl.col("tgt"),
         )
         .filter(
@@ -65,7 +65,7 @@ def build_tokenized_datasets(
         _tokenize_function, 
         batched=True,
         num_proc=num_proc,
-        remove_columns=dataset.column_names  # Remove text columns, keep only tokenized inputs
+        remove_columns=dataset.column_names 
     )
     
     return tokenized_dataset
