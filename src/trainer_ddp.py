@@ -138,10 +138,8 @@ def parse_config(config_path=None):
                 model_args, data_args, training_args = parser.parse_dict(config_dict)
 
                 if load_best_wanted and training_args.do_eval:
-                    from transformers.trainer_utils import EvalStrategy
-                    
                     if eval_strategy_wanted:
-                        training_args.eval_strategy = EvalStrategy(eval_strategy_wanted)
+                        training_args.eval_strategy = eval_strategy_wanted
                     else:
                         training_args.eval_strategy = training_args.save_strategy
                     training_args.load_best_model_at_end = True

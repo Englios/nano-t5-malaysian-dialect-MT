@@ -29,7 +29,7 @@ def build_tokenized_datasets(
     )
     
     if shuffle:
-        dataframe = dataframe.shuffle(seed=seed)
+        dataframe = dataframe.sample(fraction=1.0, shuffle=True, seed=seed)
         
     if data_limit is not None:
         dataframe = dataframe.limit(data_limit)
