@@ -24,29 +24,29 @@ def build_tokenized_datasets(
             pl.col("input_text").str.len_chars() <= max_length,
             pl.col("target_text").str.len_chars() <= max_length
         )
-        .select("input_text", "target_text")
-        .collect()
     )
     
     if shuffle:
-        dataframe = dataframe.sample(fraction=1.0, shuffle=True, seed=seed)
-        
+        dataframe = dataframe.select(pl.all()).collect().sample(fraction=1.0, shuffle=True, seed=seed)
+
     if data_limit is not None:
         dataframe = dataframe.limit(data_limit)
+
+    dataframe = dataframe.select("input_text", "target_text")
     
     dataset = Dataset.from_polars(dataframe)
     
     def _tokenize_function(examples):
         model_inputs = tokenizer(
             examples["input_text"],
-            max_length=max_length,
+            max_length=128,
             padding="max_length",
             truncation=True,
         )
         
         labels = tokenizer(
             text_target=examples["target_text"],
-            max_length=max_length,
+            max_length=128,
             padding="max_length",
             truncation=True,
         )
