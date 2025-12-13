@@ -339,7 +339,10 @@ def main_worker(rank, world_size, config_path=None):
         config=config,
         cache_dir=model_args.cache_dir,
     )
-
+    
+    model.gradient_checkpointing_enable()
+    model.config.use_cache = False
+    
     embedding_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer))

@@ -318,16 +318,13 @@ def main():
         config=config,
         cache_dir=model_args.cache_dir,
     )
+    
+    model.gradient_checkpointing_enable()
+    model.config.use_cache = False
 
     embedding_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer))
-
-    # Log model device placement
-    if torch.cuda.is_available():
-        logger.info(f"Model will be trained on GPU: {torch.cuda.get_device_name(0)}")
-    else:
-        logger.warning("Model will be trained on CPU (no GPU available)")
 
     # Check decoder_start_token_id
     if model.config.decoder_start_token_id is None:
