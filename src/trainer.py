@@ -117,14 +117,12 @@ def main():
             model_args, data_args, training_args = parser.parse_dict(config_dict)
 
             if load_best_wanted and training_args.do_eval:
-                from transformers import IntervalStrategy
+                from transformers import EvalStrategy
 
                 if eval_strategy_wanted:
-                    training_args.evaluation_strategy = IntervalStrategy(
-                        eval_strategy_wanted
-                    )
+                    training_args.eval_strategy = EvalStrategy(eval_strategy_wanted)
                 else:
-                    training_args.evaluation_strategy = training_args.save_strategy
+                    training_args.eval_strategy = training_args.save_strategy
                 training_args.load_best_model_at_end = True
         elif config_path.endswith(".json"):
             model_args, data_args, training_args = parser.parse_json_file(
@@ -278,8 +276,9 @@ def main():
         logger.info(f"Training data size: {len(train_dataset)}")
 
     eval_dataset = None
+    eval_strategy = getattr(training_args, "eval_strategy", None)
     if training_args.do_eval or (
-        training_args.do_train and training_args.evaluation_strategy != "no"
+        training_args.do_train and eval_strategy is not None and str(eval_strategy) != "no"
     ):
         logger.info("Loading validation data...")
         val_data = load_data(data_args.val_data_path)
@@ -369,7 +368,8 @@ def main():
                     logger.warning(f"Failed to log BLEU to wandb: {e}")
         return metrics
 
-    if training_args.do_train and training_args.evaluation_strategy != "no":
+    eval_strategy = getattr(training_args, "eval_strategy", None)
+    if training_args.do_train and eval_strategy is not None and str(eval_strategy) != "no":
         if training_args.predict_with_generate:
             logger.info("BLEU evaluation enabled")
         else:
