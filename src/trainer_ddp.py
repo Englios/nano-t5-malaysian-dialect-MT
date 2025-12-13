@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 def setup_ddp(rank, world_size):
     import random
     os.environ["MASTER_ADDR"] = "localhost"
-    os.environ["MASTER_PORT"] = str(random.randint(10000, 20000))
+    os.environ["MASTER_PORT"] = "12355"
     os.environ["RANK"] = str(rank)
     os.environ["WORLD_SIZE"] = str(world_size)
     os.environ["LOCAL_RANK"] = str(rank)
