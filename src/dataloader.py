@@ -65,7 +65,7 @@ def build_tokenized_datasets(
         _tokenize_function, 
         batched=True,
         num_proc=num_proc,
-        remove_columns=["input_text", "target_text"]
+        remove_columns=dataset.column_names  # Remove text columns, keep only tokenized inputs
     )
     
     return tokenized_dataset

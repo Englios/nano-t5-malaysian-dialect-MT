@@ -180,38 +180,53 @@ def main():
         cache_dir=model_args.cache_dir,
     )
     
-    train_data = load_data(data_args.train_data_path)
-    val_data = load_data(data_args.val_data_path)
-    # test_data = load_data(data_args.test_data_path)
+    # Only load train dataset if training
+    train_dataset = None
+    if training_args.do_train:
+        logger.info("Loading training data...")
+        train_data = load_data(data_args.train_data_path)
+        train_dataset = build_tokenized_datasets(
+            train_data,
+            tokenizer,
+            max_length=data_args.max_source_length,
+            data_limit=10000,
+            num_proc=training_args.dataloader_num_workers
+        )
 
-    train_dataset = build_tokenized_datasets(
-        train_data,
-        tokenizer,
-        max_length=data_args.max_source_length,
-        data_limit=10000,
-        num_proc=training_args.dataloader_num_workers
-    )
-
-    eval_dataset = build_tokenized_datasets(
-        val_data,
-        tokenizer,
-        max_length=data_args.max_source_length,
-        data_limit=2000,
-        num_proc=training_args.dataloader_num_workers
-    )
+    eval_dataset = None
+    if training_args.do_eval or (training_args.do_train and training_args.evaluation_strategy != "no"):
+        logger.info("Loading validation data...")
+        val_data = load_data(data_args.val_data_path)
+        eval_dataset = build_tokenized_datasets(
+            val_data,
+            tokenizer,
+            max_length=data_args.max_source_length,
+            data_limit=2000,
+            num_proc=training_args.dataloader_num_workers
+        )
 
     # ------------------------------ Load model ------------------------------
+    model_path = model_args.model_name_or_path
+    if training_args.do_predict and not training_args.do_train:
+        if os.path.exists(training_args.output_dir) and os.path.exists(os.path.join(training_args.output_dir, "pytorch_model.bin")):
+            model_path = training_args.output_dir
+            logger.info(f"Loading trained model from: {model_path}")
+        elif os.path.exists(training_args.output_dir) and os.path.exists(os.path.join(training_args.output_dir, "model.safetensors")):
+            model_path = training_args.output_dir
+            logger.info(f"Loading trained model from: {model_path}")
+        else:
+            logger.warning(f"No trained model found in {training_args.output_dir}. Using base model: {model_path}")
+    
     config = AutoConfig.from_pretrained(
-        model_args.model_name_or_path,
+        model_path,
         cache_dir=model_args.cache_dir,
     )
     model = AutoModelForSeq2SeqLM.from_pretrained(
-        model_args.model_name_or_path,
+        model_path,
         config=config,
         cache_dir=model_args.cache_dir,
     )
 
-    # Resize embeddings if needed
     embedding_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer))
@@ -283,13 +298,23 @@ def main():
 
     # ------------------------------ Prediction ------------------------------
     if training_args.do_predict:
+        
+        test_data = load_data(data_args.test_data_path)
+        test_dataset = build_tokenized_datasets(
+            test_data,
+            tokenizer,
+            max_length=data_args.max_source_length,
+            data_limit=100, 
+            num_proc=training_args.dataloader_num_workers
+        )
+        
         logger.info("*** Predict ***")
         max_length = (
             training_args.generation_max_length
             if training_args.generation_max_length is not None
             else data_args.val_max_target_length
         )
-        predict_results = trainer.predict(eval_dataset, metric_key_prefix="predict", max_length=max_length)
+        predict_results = trainer.predict(test_dataset, metric_key_prefix="predict", max_length=max_length)
         trainer.log_metrics("predict", predict_results.metrics)
         trainer.save_metrics("predict", predict_results.metrics)
 
