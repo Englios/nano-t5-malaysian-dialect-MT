@@ -138,7 +138,7 @@ def parse_config(config_path=None):
                 model_args, data_args, training_args = parser.parse_dict(config_dict)
 
                 if load_best_wanted and training_args.do_eval:
-                    from transformers import EvalStrategy
+                    from transformers.trainer_utils import EvalStrategy
                     
                     if eval_strategy_wanted:
                         training_args.eval_strategy = EvalStrategy(eval_strategy_wanted)
@@ -293,8 +293,11 @@ def main_worker(rank, world_size, config_path=None):
             max_length=data_args.max_source_length,
             data_limit=train_size_wanted,
             num_proc=training_args.dataloader_num_workers,
+            shuffle=True,
+            seed=training_args.seed,
         )
         if rank == 0:
+            logger.info(f"First 3 shuffled IDs: {train_data[:3]}")
             logger.info(f"Training data size: {len(train_dataset)}")
 
     eval_dataset = None
@@ -311,6 +314,8 @@ def main_worker(rank, world_size, config_path=None):
             max_length=data_args.max_source_length,
             data_limit=val_size_wanted,
             num_proc=training_args.dataloader_num_workers,
+            shuffle=True,
+            seed=training_args.seed,
         )
         if rank == 0:
             logger.info(f"Validation data size: {len(eval_dataset)}")
@@ -455,6 +460,8 @@ def main_worker(rank, world_size, config_path=None):
             max_length=data_args.max_source_length,
             data_limit=test_size_wanted,
             num_proc=training_args.dataloader_num_workers,
+            shuffle=True,
+            seed=training_args.seed,
         )
 
         if rank == 0:

@@ -11,6 +11,8 @@ def build_tokenized_datasets(
     max_length: int = 1024,
     data_limit: int | None = None,
     num_proc: int = 8,
+    seed: int = 67,
+    shuffle: bool = False,
 ) -> Dataset:
     """Build tokenized datasets from polars LazyFrame."""
     dataframe = (
@@ -26,6 +28,9 @@ def build_tokenized_datasets(
         .collect()
     )
     
+    if shuffle:
+        dataframe = dataframe.shuffle(seed=seed)
+        
     if data_limit is not None:
         dataframe = dataframe.limit(data_limit)
     
@@ -78,6 +83,6 @@ if __name__ == "__main__":
     data_path = Path(__file__).parent / "data" / "processed" / "dataset" / "train.parquet"
     data = load_data(str(data_path))
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    tokenized_dataset = build_tokenized_datasets(data, tokenizer, data_limit=10000)
+    tokenized_dataset = build_tokenized_datasets(data, tokenizer, data_limit=10000, seed=67, shuffle=True)
     print(tokenized_dataset)
 
