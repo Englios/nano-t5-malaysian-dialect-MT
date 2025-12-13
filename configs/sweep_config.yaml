@@ -6,7 +6,7 @@ command:
   - configs/train_config_sweep.yaml
 
 method: bayes 
-max_runs: 5  
+run_cap: 5  # Maximum number of runs for this sweep  
 
 metric:
   name: eval_bleu 
