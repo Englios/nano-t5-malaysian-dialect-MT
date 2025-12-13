@@ -1,13 +1,14 @@
-# Model Arguments
+
 model_name_or_path: "mesolitica/nanot5-small-malaysian-cased"
 cache_dir: null
 
+# Model Arguments
 # Data Arguments
 train_data_path: "src/data/processed/dataset/train.parquet"
 val_data_path: "src/data/processed/dataset/val.parquet"
 test_data_path: "src/data/processed/dataset/test.parquet"
 max_source_length: 800
-max_target_length: 128
+max_target_length: 150
 val_max_target_length: null  
 pad_to_max_length: false
 ignore_pad_token_for_loss: true
@@ -17,11 +18,11 @@ output_dir: "outputs"
 do_train: true
 do_eval: true
 do_predict: false
-train_size: 10000
-val_size: 1000
-test_size: 1000
 
-# Training hyperparameters
+train_size: 3000      
+val_size: 500         
+test_size: 500
+
 num_train_epochs: 3
 per_device_train_batch_size: 8
 per_device_eval_batch_size: 8
@@ -29,23 +30,22 @@ gradient_accumulation_steps: 1
 learning_rate: 5.0e-5
 weight_decay: 0.01
 warmup_steps: 500
-logging_steps: 100
-save_steps: 500 
-eval_steps: 500
+
+logging_steps: 50      
+save_steps: 300        # Not used when save_strategy is "no"
+eval_steps: 300        # Less frequent evals = faster        
 evaluation_strategy: "steps"
-save_strategy: "steps"
-save_total_limit: 3  
-load_best_model_at_end: true  
+save_strategy: "no"    # Don't save checkpoints during hyperparameter tuning
+save_total_limit: 0    # Don't keep any checkpoints
+load_best_model_at_end: false  # No checkpoints to load
 metric_for_best_model: eval_bleu
 greater_is_better: true
-save_safetensors: true  
+save_safetensors: false  # Don't save models  
 
-# Generation settings
 generation_max_length: 128
 generation_num_beams: 4
 predict_with_generate: true
 
-# Other settings
 seed: 67
 fp16: true  
 bf16: false 
@@ -53,10 +53,8 @@ no_cuda: false
 dataloader_num_workers: 4
 remove_unused_columns: false
 
-# Weights & Biases
 report_to: ["wandb"]
 run_name: "${WANDB_RUN_NAME:-mesolitica-nanot5-translation}"
-wandb_project: "${WANDB_PROJECT:-ml-eng-assessment}"
+wandb_project: "${WANDB_PROJECT:-ml_eng_meso-nano_t5_small}"
 wandb_entity: "${WANDB_ENTITY:-null}"
 wandb_api_key: "${WANDB_API_KEY:-null}"
-
