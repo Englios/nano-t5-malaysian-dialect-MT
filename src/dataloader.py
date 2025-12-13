@@ -39,27 +39,17 @@ def build_tokenized_datasets(
     def _tokenize_function(examples):
         model_inputs = tokenizer(
             examples["input_text"],
-            max_length=128,
-            padding="max_length",
+            max_length=512,
             truncation=True,
         )
         
         labels = tokenizer(
             text_target=examples["target_text"],
             max_length=128,
-            padding="max_length",
             truncation=True,
         )
         
-        if "input_ids" in labels:
-            labels["input_ids"] = [
-                [(token_id if token_id != tokenizer.pad_token_id else -100) for token_id in label] 
-                for label in labels["input_ids"]
-            ]
-        
-        model_inputs["labels"] = [
-            [int(x) for x in label] for label in labels["input_ids"]
-        ]
+        model_inputs["labels"] = labels["input_ids"]
         
         if "token_type_ids" in model_inputs:
             del model_inputs["token_type_ids"]

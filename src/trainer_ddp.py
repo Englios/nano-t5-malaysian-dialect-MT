@@ -279,6 +279,7 @@ def main_worker(rank, world_size, config_path=None):
         model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
     )
+    
 
     train_dataset = None
     if training_args.do_train:
