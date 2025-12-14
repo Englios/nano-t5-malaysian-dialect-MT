@@ -1,15 +1,15 @@
 # =====================
 # Model
 # =====================
-model_name_or_path: "mesolitica/nanot5-small-malaysian-cased"
+model_name_or_path: "outputs/home_small_stage1/home-nanot5-small-stage1/"
 cache_dir: null
 
 # =====================
 # Data
 # =====================
-train_data_path: "src/data/processed/dataset/stage1/train.parquet"
-val_data_path: "src/data/processed/dataset/stage1/val.parquet"
-test_data_path: "src/data/processed/dataset/stage1/test.parquet"
+train_data_path: "src/data/processed/dataset/stage2/train.parquet"
+val_data_path: "src/data/processed/dataset/stage2/val.parquet"
+test_data_path: "src/data/processed/dataset/stage2/test.parquet"
 
 max_source_length: 800        # char length
 max_target_length: 128
@@ -19,34 +19,34 @@ ignore_pad_token_for_loss: true
 
 train_size: null
 # train_size: 10000
-val_size: 2000
+val_size: 3000
 test_size: 2000
 
 # =====================
 # Training
 # =====================
-output_dir: "outputs/home_small_stage1/home-nanot5-small-stage1/"
+output_dir: "outputs/home_small_stage2"
 do_train: true
 do_eval: true
 do_predict: false
 
-num_train_epochs: 2
+num_train_epochs: 4
 per_device_train_batch_size: 8
 per_device_eval_batch_size: 8
 gradient_accumulation_steps: 1
 
-learning_rate: 5.0e-5
+learning_rate: 1.0e-5
 weight_decay: 0.01
 warmup_steps: 2000
 
 
 logging_steps: 200
-save_steps: 5000
-eval_steps: 10000
+save_steps: 3000
+eval_steps: 9000
 
 evaluation_strategy: "steps"
 save_strategy: "steps"
-save_total_limit: 2
+save_total_limit: 3
 load_best_model_at_end: true
 metric_for_best_model: eval_bleu
 greater_is_better: true
@@ -73,6 +73,6 @@ seed: 67
 # Logging
 # =====================
 report_to: ["wandb"]
-run_name: "home-nanot5-small-stage1"
+run_name: "home-nanot5-small-stage2"
 wandb_project: "ml_eng_meso_nano_t5_small_home"
 wandb_entity: null
