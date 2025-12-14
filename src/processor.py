@@ -253,19 +253,35 @@ def run_data_processing(stage, num_shards, output_dir):
         ).alias("direction_pair")
     )
 
-    balance_dict = {
-        "Melayu_Inggeris": 10000,
-        "Inggeris_Melayu": 10000,
-    }
+
+    standard_all_lf = combined_lf.filter(
+        pl.col("direction_pair").is_in(["Melayu_Inggeris", "Inggeris_Melayu"])
+    )
+    standard_all_df = standard_all_lf.collect().sample(fraction=1.0, shuffle=True, seed=42)
+    stage1_df = standard_all_df.head(200000).lazy()
+
+    stage1_remaining_df = standard_all_df.tail(standard_all_df.height - 200000).lazy()
+
+    dialect_lf = combined_lf.filter(
+        ~pl.col("direction_pair").is_in(["Melayu_Inggeris", "Inggeris_Melayu"])
+    )
+
+    stage2_df = pl.concat([dialect_lf, stage1_remaining_df], how="vertical_relaxed", rechunk=True).lazy()
     
-    combined_lf = create_semantic_key(combined_lf)
+    stage1_df = create_semantic_key(stage1_df)
+    stage2_df = create_semantic_key(stage2_df)
+    
     logger.info(f"Raw data size: {combined_lf.select(pl.len()).collect()}")
     
-    train, val, test = create_train_test_split(combined_lf,balance_dict=balance_dict)
+    train, val, test = create_train_test_split(stage1_df)
+    train.sink_parquet(f"{output_dir.parent}/dataset/stage1/train.parquet", compression="gzip")
+    val.sink_parquet(f"{output_dir.parent}/dataset/stage1/val.parquet", compression="gzip")
+    test.sink_parquet(f"{output_dir.parent}/dataset/stage1/test.parquet", compression="gzip")
 
-    train.sink_parquet(f"{output_dir.parent}/dataset/train.parquet", compression="gzip")
-    val.sink_parquet(f"{output_dir.parent}/dataset/val.parquet", compression="gzip")
-    test.sink_parquet(f"{output_dir.parent}/dataset/test.parquet", compression="gzip")
+    train, val, test = create_train_test_split(stage2_df)
+    train.sink_parquet(f"{output_dir.parent}/dataset/stage2/train.parquet", compression="gzip")
+    val.sink_parquet(f"{output_dir.parent}/dataset/stage2/val.parquet", compression="gzip")
+    test.sink_parquet(f"{output_dir.parent}/dataset/stage2/test.parquet", compression="gzip")
 
 
 if __name__ == "__main__":

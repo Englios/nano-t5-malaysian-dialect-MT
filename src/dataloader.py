@@ -1,6 +1,9 @@
 import polars as pl
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from datasets import Dataset
+import logging
+
+logger = logging.getLogger(__name__)
 
 def load_data(data_path: str) -> pl.LazyFrame:
     return pl.scan_parquet(data_path)
@@ -17,7 +20,7 @@ def build_tokenized_datasets(
     """Build tokenized datasets from polars LazyFrame."""
     dataframe = (
         data.with_columns(
-            input_text=pl.format("terjermah {} ke {}: ", pl.col("detected_src").str.to_lowercase(), pl.col("dialect").str.to_lowercase()),
+            input_text=pl.format("terjemah {} ke {}: ", pl.col("detected_src").str.to_lowercase(), pl.col("dialect").str.to_lowercase()),
             target_text=pl.col("tgt"),
         )
         .filter(
@@ -25,6 +28,8 @@ def build_tokenized_datasets(
             pl.col("target_text").str.len_chars() <= max_length
         )
     )
+    
+    logger.info(f"Data sample: {dataframe.show()}")
     
     if shuffle:
         dataframe = dataframe.select(pl.all()).collect().sample(fraction=1.0, shuffle=True, seed=seed)
